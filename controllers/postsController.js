@@ -5,22 +5,20 @@ let posts = require('../data/posts');
 const index = (req, res) => {
     const tag = req.query.tag;
 
+    $sql = 'SELECT posts.* FROM posts';
+
     if (tag) {
-        const filteredPosts = posts.filter(post => post.tags.includes(tag));
-
-        if (filteredPosts.length === 0) {
-            res.json({
-                status: 404,
-                message: `Post with tag ${tag} not found`
-            });
-        } else {
-            res.json(filteredPosts);
-        }
-
-    } else {
-        res.json(posts);
+        $sql += `
+            JOIN post_tag ON post_tag.post_id = posts.id
+            WHERE post_tag.tag_id = 1
+        `;
     }
 
+    conn.query($sql, (err, result) => {
+        if (err) res.status(500).json("Error getting posts");
+
+        res.json(result);
+    });
 }
 
 const show = (req, res) => {
