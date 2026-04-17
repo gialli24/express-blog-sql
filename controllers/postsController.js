@@ -24,9 +24,15 @@ const index = (req, res) => {
 const show = (req, res) => {
     const id = parseInt(req.params.id);
 
-    const post = posts.find(post => post.id === id);
+    $sql = "SELECT posts.* FROM posts WHERE posts.id = ?";
 
-    res.json(post);
+    conn.query($sql, [id], (err, result) => {
+        if (err) return res.status(500).json("Error getting post");
+
+        if (result.length === 0) return res.status(404).json("Post not found");
+
+        res.json(result[0]);
+    });
 }
 
 const store = (req, res) => {
