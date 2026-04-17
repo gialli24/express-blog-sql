@@ -10,11 +10,11 @@ const index = (req, res) => {
     if (tag) {
         $sql += `
             JOIN post_tag ON post_tag.post_id = posts.id
-            WHERE post_tag.tag_id = 1
+            WHERE post_tag.tag_id = ?
         `;
     }
 
-    conn.query($sql, (err, result) => {
+    conn.query($sql, [tag], (err, result) => {
         if (err) res.status(500).json("Error getting posts");
 
         res.json(result);
@@ -77,23 +77,12 @@ const modify = (req, res) => {
 const destroy = (req, res) => {
     const id = parseInt(req.params.id);
 
-    const deletedPost = posts.find(p => p.id === id);
+    $sql = 'DELETE FROM posts WHERE id = ?';
 
-    if (!deletedPost) {
-        res.json({
-            status: 404,
-            message: `Post ${id} not found`
-        });
-    } else {
-        posts = posts.filter(p => p.id !== id);
-
-        console.log(posts);
-
-        res.json({
-            status: 204,
-            message: `Post ${id} deleted`
-        });
-    }
+    conn.query($sql, [id], (err, result) => {
+        if (err) res.status(500).json("Error deleting post");
+        res.status(204);
+    });
 
 }
 
