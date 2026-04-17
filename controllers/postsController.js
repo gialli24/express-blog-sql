@@ -15,7 +15,7 @@ const index = (req, res) => {
     }
 
     conn.query($sql, [tag], (err, result) => {
-        if (err) res.status(500).json("Error getting posts");
+        if (err) return res.status(500).json("Error getting posts");
 
         res.json(result);
     });
@@ -80,10 +80,12 @@ const destroy = (req, res) => {
     $sql = 'DELETE FROM posts WHERE id = ?';
 
     conn.query($sql, [id], (err, result) => {
-        if (err) res.status(500).json("Error deleting post");
-        res.status(204);
-    });
+        if (err) return res.status(500).json("Error deleting post");
 
+        if (result.affectedRows === 0) return res.status(404).json("Post not found");
+
+        res.sendStatus(204);
+    });
 }
 
 module.exports = {
