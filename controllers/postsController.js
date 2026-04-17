@@ -24,14 +24,28 @@ const index = (req, res) => {
 const show = (req, res) => {
     const id = parseInt(req.params.id);
 
-    $sql = "SELECT posts.* FROM posts WHERE posts.id = ?";
+    $postSql = "SELECT posts.* FROM posts WHERE posts.id = ?";
 
-    conn.query($sql, [id], (err, result) => {
+    conn.query($postSql, [id], (err, result) => {
         if (err) return res.status(500).json("Error getting post");
-
         if (result.length === 0) return res.status(404).json("Post not found");
 
-        res.json(result[0]);
+        $post = result[0];
+
+        $tagsSql = `
+            SELECT tags.*
+            FROM tags
+            JOIN post_tag ON post_tag.tag_id = tags.id
+            WHERE post_tag.post_id = ?
+        `;
+
+        conn.query($tagsSql, [id], (err, result) => {
+            if (err) return res.status(500).json("Error getting tags");
+
+            $post.tags = result;
+
+            res.json($post);
+        });
     });
 }
 
